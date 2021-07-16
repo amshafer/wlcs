@@ -24,6 +24,7 @@ cmake_policy(SET CMP0022 NEW)
 project(wlcs VERSION 1.3.0)
 
 add_definitions(-D_GNU_SOURCE)
+add_definitions(-D__BSD_VISIBLE)
 add_definitions(-D_FILE_OFFSET_BITS=64)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -50,16 +51,16 @@ if (HAVE_W_GNU_VARIADIC_MACROS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=gnu-zero-variadic-macro-arguments")
 endif ()
 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+)
+
 include(CheckCXXSymbolExists)
 list(APPEND CMAKE_REQUIRED_HEADERS ${GTEST_INCLUDE_DIRECTORIES})
-check_cxx_symbol_exists(INSTANTIATE_TEST_SUITE_P "gtest/gtest.h" HAVE_INSTANTIATE_TEST_SUITE_P)
-if (NOT HAVE_INSTANTIATE_TEST_SUITE_P)
-  #GTest conveniently renamed INSTANTIATE_TEST_CASE_P and then deprecated it.
-  add_definitions(-DINSTANTIATE_TEST_SUITE_P=INSTANTIATE_TEST_CASE_P)
-endif()
 
 find_package(Boost)
-find_package(GtestGmock)
 pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
 pkg_check_modules(WAYLAND_SERVER REQUIRED wayland-server)
 pkg_check_modules(WAYLAND_SCANNER REQUIRED wayland-scanner)
@@ -68,6 +69,8 @@ include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include(GoogleTest)
+gtest_discover_tests(wlcs)
 
 set(PROTOCOL_SOURCES "")
 
@@ -256,6 +259,7 @@ foreach(TARGET IN LISTS EXECUTABLE_TARGETS)
 
     ${GMOCK_LIBRARY}
     ${GTEST_LIBRARY}
+    gtest_main
   )
 endforeach(TARGET)
 

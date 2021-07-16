@@ -24,51 +24,15 @@
 #include <system_error>
 
 #include <fcntl.h>
-#include <linux/memfd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 #include <sys/syscall.h>
-
-namespace
-{
-
-bool error_indicates_tmpfile_not_supported(int error)
-{
-    return
-        error == EISDIR ||  // Directory exists, but no support for O_TMPFILE
-        error == ENOENT ||  // Directory doesn't exist, and no support for O_TMPFILE
-        error == EOPNOTSUPP ||    // Filesystem that directory resides on does not support O_TMPFILE
-        error == EINVAL;    // There apparently exists at least one development board that has a kernel
-    // that incorrectly returns EINVAL. Yay.
-}
-
-int memfd_create(char const* name, unsigned int flags)
-{
-    return static_cast<int>(syscall(SYS_memfd_create, name, flags));
-}
-}
 
 int wlcs::helpers::create_anonymous_file(size_t size)
 {
 
     int fd = memfd_create("wlcs-unnamed", MFD_CLOEXEC);
-    if (fd == -1 && errno == ENOSYS)
-    {
-        fd = open("/dev/shm", O_TMPFILE | O_RDWR | O_EXCL | O_CLOEXEC, S_IRWXU);
-
-        // Workaround for filesystems that don't support O_TMPFILE
-        if (fd == -1 && error_indicates_tmpfile_not_supported(errno))
-        {
-            char template_filename[] = "/dev/shm/wlcs-buffer-XXXXXX";
-            fd = mkostemp(template_filename, O_CLOEXEC);
-            if (fd != -1)
-            {
-                if (unlink(template_filename) < 0)
-                {
-                    close(fd);
-                    fd = -1;
-                }
-            }
-        }
-    }
 
     if (fd == -1)
     {
