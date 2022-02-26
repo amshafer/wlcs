@@ -70,7 +70,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include(GoogleTest)
-gtest_discover_tests(wlcs)
 
 set(PROTOCOL_SOURCES "")
 
@@ -285,3 +284,5 @@ install(
   DESTINATION
     ${CMAKE_INSTALL_LIBDIR}/pkgconfig/
 )
+
+gtest_discover_tests(wlcs)
