@@ -17,8 +17,9 @@
  */
 
 #include "version_specifier.h"
+#include <string>
 
-using std::experimental::optional;
+using std::optional;
 
 wlcs::ExactlyVersion::ExactlyVersion(uint32_t version) noexcept
     : version{version}
