@@ -51,16 +51,11 @@ if (HAVE_W_GNU_VARIADIC_MACROS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=gnu-zero-variadic-macro-arguments")
 endif ()
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-)
-
 include(CheckCXXSymbolExists)
 list(APPEND CMAKE_REQUIRED_HEADERS ${GTEST_INCLUDE_DIRECTORIES})
 
 find_package(Boost)
+find_package(GtestGmock)
 pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
 pkg_check_modules(WAYLAND_SERVER REQUIRED wayland-server)
 pkg_check_modules(WAYLAND_SCANNER REQUIRED wayland-scanner)
@@ -69,7 +64,6 @@ include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include(GoogleTest)
 
 set(PROTOCOL_SOURCES "")
 
@@ -284,5 +278,3 @@ install(
   DESTINATION
     ${CMAKE_INSTALL_LIBDIR}/pkgconfig/
 )
-
-gtest_discover_tests(wlcs)
